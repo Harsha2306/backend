@@ -757,8 +757,12 @@ exports.checkout = async (req, res, next) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `${process.env.BASE_URL}/payment-success`,
-      cancel_url: `${process.env.BASE_URL}/cart`,
+      success_url: `${
+        process.env.IS_PROD ? process.env.PROD_BASE_URL : process.env.BASE_URL
+      }/payment-success`,
+      cancel_url: `${
+        process.env.IS_PROD ? process.env.PROD_BASE_URL : process.env.BASE_URL
+      }/cart`,
     });
 
     res.status(201).json({
