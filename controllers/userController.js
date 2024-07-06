@@ -758,10 +758,14 @@ exports.checkout = async (req, res, next) => {
       line_items: lineItems,
       mode: "payment",
       success_url: `${
-        process.env.IS_PROD ? process.env.PROD_BASE_URL : process.env.BASE_URL
+        process.env.IS_PROD === "YES"
+          ? process.env.PROD_BASE_URL
+          : process.env.BASE_URL
       }/payment-success`,
       cancel_url: `${
-        process.env.IS_PROD ? process.env.PROD_BASE_URL : process.env.BASE_URL
+        process.env.IS_PROD === "YES"
+          ? process.env.PROD_BASE_URL
+          : process.env.BASE_URL
       }/cart`,
     });
 
