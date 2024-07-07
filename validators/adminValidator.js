@@ -1,5 +1,7 @@
 const { check } = require("express-validator");
 
+const validStatuses = ["pending", "Approved", "Delivered"];
+
 exports.validateItemName = check("itemName")
   .trim()
   .notEmpty()
@@ -28,3 +30,9 @@ exports.validateItemDescription = check("itemDescription")
   .matches(/.*/)
   .withMessage("Invalid description");
 
+exports.validateOrderStatus = check("orderStatus")
+  .trim()
+  .notEmpty()
+  .withMessage("Please fill out this field.")
+  .isIn(validStatuses)
+  .withMessage(`Invalid status. Must be one of: ${validStatuses.join(", ")}`);

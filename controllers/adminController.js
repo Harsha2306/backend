@@ -2,6 +2,7 @@ const { validationResult } = require("express-validator");
 
 const { handleError } = require("../util/handleError");
 const Product = require("../models/product");
+const Order = require("../models/order");
 
 const mongoose = require("mongoose");
 
@@ -171,4 +172,103 @@ exports.postProduct = async (req, res, next) => {
     next(error);
   }
 };
-``
+
+exports.postOrderStatus = async (req, res, next) => {
+  try {
+    if (req.isAdmin === false)
+      throw handleError({
+        message: "Not Authorized",
+        statusCode: 401,
+        ok: false,
+      });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorFields = errors.array().map((err) => {
+        return { field: err.path, errorMessage: err.msg };
+      });
+      throw handleError({
+        message: "Validation Error",
+        statusCode: 422,
+        errorFields,
+        ok: false,
+      });
+    }
+    let { orderStatus, orderId } = req.body;
+    orderId = new mongoose.Types.ObjectId(orderId);
+    const order = await Order.findOne({ _id: orderId });
+    if (!order)
+      throw handleError({
+        message: "No order found",
+        statusCode: 404,
+        ok: false,
+      });
+    order.status = orderStatus;
+    const savedOrder = await order.save();
+    if (!savedOrder)
+      throw handleError({
+        message: "Order not saved",
+        statusCode: 500,
+        ok: false,
+      });
+    res.status(200).json({
+      ok: true,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getAllOrders = async (req, res, next) => {
+  try {
+    if (req.isAdmin === false)
+      throw handleError({
+        message: "Not Authorized",
+        statusCode: 401,
+        ok: false,
+      });
+    const orders = await Order.find().sort({ createdAt: -1 });
+    if (!orders)
+      throw handleError({
+        message: "Error occured while fetching orders",
+        statusCode: 500,
+        ok: false,
+      });
+    const productIdNameMap = new Map();
+    const ordersSummary = [];
+    orders.forEach((order) =>
+      order.items.map((item) =>
+        productIdNameMap.set(item.productId.toString(), "")
+      )
+    );
+    const products = await Product.find({
+      _id: { $in: Array.from(productIdNameMap.keys()) },
+    });
+    if (!products)
+      throw handleError({
+        message: "Products not found",
+        statusCode: 404,
+        ok: false,
+      });
+    products.forEach((product) => {
+      productIdNameMap.set(product._id.toString(), product.itemName);
+    });
+    orders.forEach((order) =>
+      ordersSummary.unshift({
+        orderId: order._id,
+        products: order.items.map((item) => ({
+          name: productIdNameMap.get(item.productId.toString()),
+          qty: item.quantity,
+          color: item.color,
+          size: item.size || "",
+        })),
+        orderStatus: order.status,
+      })
+    );
+    res.status(200).json({
+      ordersSummary,
+      ok: true,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

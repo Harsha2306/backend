@@ -19,4 +19,12 @@ router.post(
   adminController.postProduct
 );
 router.get("/product/:productId", isAuthorized, adminController.getProductById);
+router.post(
+  "/updateOrderStatus",
+  isAuthorized,
+  [adminValidator.validateOrderStatus],
+  adminController.postOrderStatus
+);
+router.get("/orders", isAuthorized, adminController.getAllOrders)
+
 module.exports = router;

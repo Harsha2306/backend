@@ -917,6 +917,11 @@ exports.getOrderDetails = async (req, res, next) => {
       };
     });
 
+    let orderStatus;
+    if (order.status === "pending") orderStatus = "Order Placed";
+    else if (order.status === "Approved") orderStatus = "Out for delivery";
+    else if (order.status === "Delivered") orderStatus = "Delivered";
+
     res.status(200).json({
       ok: true,
       productsWithPrices,
@@ -931,6 +936,7 @@ exports.getOrderDetails = async (req, res, next) => {
         hour12: false,
       }).format(new Date(order.createdAt)),
       id: order._id,
+      orderStatus,
     });
   } catch (error) {
     next(error);

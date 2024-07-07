@@ -7,6 +7,7 @@ const orderSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     items: [orderItemSchema],
+    status: { type: String, default: "pending" },
   },
   {
     timestamps: true,
