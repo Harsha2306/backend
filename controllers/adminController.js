@@ -253,7 +253,7 @@ exports.getAllOrders = async (req, res, next) => {
       productIdNameMap.set(product._id.toString(), product.itemName);
     });
     orders.forEach((order) =>
-      ordersSummary.unshift({
+      ordersSummary.push({
         orderId: order._id,
         products: order.items.map((item) => ({
           name: productIdNameMap.get(item.productId.toString()),
