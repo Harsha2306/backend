@@ -201,13 +201,16 @@ exports.forgotPassword = async (req, res, next) => {
 
     transporter.sendMail(mailOptions, (err) => {
       if (err) {
-        return res.status(500).send("Error sending email.");
+        return res.status(500).json({
+          message: "Error sending email",
+          ok: false,
+        });
       }
-      res.status(200).send("Password reset email sent.");
-    });
 
-    res.status(200).json({
-      ok: true,
+      res.status(200).json({
+        message: "Password reset email sent successfully",
+        ok: true,
+      });
     });
   } catch (error) {
     next(error);
